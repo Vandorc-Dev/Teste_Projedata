@@ -6,6 +6,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.stream.Collectors;
 import java.time.Month;
+import java.math.RoundingMode;
 
 public class GestaoPessoas {
 
@@ -51,7 +52,15 @@ public class GestaoPessoas {
         //Imprimi os funcionários em ordem alfabética
         System.out.println("\nFUNCIONÁRIO, EM ORDEM ALFABÉTICA:");
         imprimirFuncionariosOrdemAlfabetica(funcionarios);
+        
+        //Total de salarios
+        System.out.println("\n TOTAL DE SALÁRIOS DOS FUNCIONÁRIOS:");
+        imprimirTotalSalarios(funcionarios);
        
+        
+        //Salários minimos por funcionário
+        System.out.println("\nSALÁRIOS MÍNIMOS POR FUNCIONÁRIO:");
+        imprimirSalariosMinimos(funcionarios);
     }
 
     private static void inserirFuncionarios(List<Funcionario> funcionarios) {
@@ -194,6 +203,38 @@ public class GestaoPessoas {
                     System.out.println("Função: " + funcionario.getFuncao());
                     System.out.println("------------------------");
                 });
+    }
+    
+    
+    //3.11 Total de salários
+    private static void imprimirTotalSalarios(List<Funcionario> funcionarios) {
+        BigDecimal totalSalarios = funcionarios.stream()
+                .map(Funcionario::getSalario)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setDecimalSeparator(',');
+        symbols.setGroupingSeparator('.');
+
+        DecimalFormat decimalFormat = new DecimalFormat("#,##0.00", symbols);
+        String totalSalariosFormatado = decimalFormat.format(totalSalarios);
+
+        System.out.println("Total dos salários: R$ " + totalSalariosFormatado);
+    }
+    
+    //3.12 Calcula salários minimos por funcionário
+    private static void imprimirSalariosMinimos(List<Funcionario> funcionarios) {
+        BigDecimal salarioMinimo = new BigDecimal("1212.00");
+
+        for (Funcionario funcionario : funcionarios) {
+            BigDecimal salario = funcionario.getSalario();
+            BigDecimal quantidadeSalariosMinimos = salario.divide(salarioMinimo, 2, RoundingMode.HALF_UP);
+
+            System.out.println("Nome: " + funcionario.getNome());
+            System.out.println("Salário: R$ " + salario);
+            System.out.println("Quantidade de salários mínimos: " + quantidadeSalariosMinimos);
+            System.out.println("------------------------");
+        }
     }
 
 }
