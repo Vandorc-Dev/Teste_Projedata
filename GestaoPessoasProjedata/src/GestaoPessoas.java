@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.stream.Collectors;
+import java.time.Month;
 
 public class GestaoPessoas {
 
@@ -12,32 +13,45 @@ public class GestaoPessoas {
 
         List<Funcionario> funcionarios = new ArrayList<>();
 
-        //Insere os funcionarios em uma lista
+        //Insere os funcionarios em uma listas
         inserirFuncionarios(funcionarios);
 
         System.out.println("IPRIMIR LISTA DE FUNCIONÁRIOS COMPLETA:");
-        System.out.println("\n");
         imprimirFuncionarios(funcionarios);
         
         //Remove um funcionario passado como argumento 
         
         removerFuncionario(funcionarios, "João");
         System.out.println("\nO funcionário João foi removido");
-        System.out.println("\n");
         
-        System.out.println("IPRIMIR LISTA DE FUNCIONÁRIOS EXCLUÍNDO O FUNCIONÁRIO João");
-        System.out.println("\n");
+        System.out.println("\nIPRIMIR LISTA DE FUNCIONÁRIOS EXCLUÍNDO O FUNCIONÁRIO João");
         imprimirFuncionarios(funcionarios);
 
         imprimirFuncionarios(funcionarios);
         
         aumentarSalario(funcionarios);
-        System.out.println("IPRIMIR LISTA DE FUNCIONÁRIOS COM AUMENTO DE 10%");
-        System.out.println("\n");
+        System.out.println("\nIPRIMIR LISTA DE FUNCIONÁRIOS COM AUMENTO DE 10%");
         imprimirFuncionarios(funcionarios);
         
+        // 3.5 - Agrupar os funcionários por função em um MAP
+        Map<String, List<Funcionario>> funcionariosAgrupados = agruparFuncionariosPorFuncao(funcionarios);
+
+        // 3.6 - Imprimir os funcionários, agrupados por função
+        System.out.println("\nIMPRIMIR FUNCIONÁRIOS AGRUPADOS POR FUNÇÃO:");
+        imprimirFuncionariosAgrupados(funcionariosAgrupados);
         
+        //Imprimir aniversariantes        
+        System.out.println("\nIMPRIMIR ANIVERSARIANTES NO MÊS 10 E 12:");
+        imprimirAniversariantes(funcionarios);
         
+        //Imprimir o funcionário com maior idade
+        System.out.println("\nFUNCIONÁRIOS COM MAIOR IDADE:");
+        imprimirFuncionarioMaiorIdade(funcionarios);
+        
+        //Imprimi os funcionários em ordem alfabética
+        System.out.println("\nFUNCIONÁRIO, EM ORDEM ALFABÉTICA:");
+        imprimirFuncionariosOrdemAlfabetica(funcionarios);
+       
     }
 
     private static void inserirFuncionarios(List<Funcionario> funcionarios) {
@@ -102,13 +116,86 @@ public class GestaoPessoas {
     }
     
     
- // 3.5 - Agrupar os funcionários por função em um MAP, sendo a chave a “função” e o valor a “lista de funcionários”.
+    
+    // 3.5 - Agrupar os funcionários por função em um MAP
     private static Map<String, List<Funcionario>> agruparFuncionariosPorFuncao(List<Funcionario> funcionarios) {
         return funcionarios.stream()
                 .collect(Collectors.groupingBy(Funcionario::getFuncao));
     }
+
+    // 3.6 - Imprimir os funcionários, agrupados por função
+    private static void imprimirFuncionariosAgrupados(Map<String, List<Funcionario>> funcionariosAgrupados) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setDecimalSeparator(',');
+        symbols.setGroupingSeparator('.');
+
+        for (Map.Entry<String, List<Funcionario>> entry : funcionariosAgrupados.entrySet()) {
+            String funcao = entry.getKey();
+            List<Funcionario> funcionarios = entry.getValue();
+
+            System.out.println("Função: " + funcao);
+            System.out.println("------------------------");
+
+            for (Funcionario funcionario : funcionarios) {
+                System.out.println("Nome: " + funcionario.getNome());
+                System.out.println("Data de Nascimento: " + funcionario.getDataNascimento().format(formatter));
+                System.out.println("Salário: " + formatarSalario(funcionario.getSalario()));
+                System.out.println("------------------------");
+            }
+        }
+    }
     
-    //3.6
+    //3.8 Aniversariantes no mes 10 e 12
+    private static void imprimirAniversariantes(List<Funcionario> funcionarios) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate dataAtual = LocalDate.now();
+
+        for (Funcionario funcionario : funcionarios) {
+            LocalDate dataNascimento = funcionario.getDataNascimento();
+            Month mesNascimento = dataNascimento.getMonth();
+            if (mesNascimento == Month.OCTOBER || mesNascimento == Month.DECEMBER) {
+                System.out.println("Nome: " + funcionario.getNome());
+                System.out.println("Data de Nascimento: " + dataNascimento.format(formatter));
+                System.out.println("Salário: " + funcionario.getSalario());
+                System.out.println("Função: " + funcionario.getFuncao());
+                System.out.println("------------------------");
+            }
+        }
+    }
+    
+    //3.9 Funcionário com maior idade
+    private static void imprimirFuncionarioMaiorIdade(List<Funcionario> funcionarios) {
+        LocalDate dataAtual = LocalDate.now();
+        Funcionario funcionarioMaisVelho = funcionarios.stream()
+                .max(Comparator.comparing(funcionario -> calcularIdade(funcionario.getDataNascimento(), dataAtual)))
+                .orElse(null);
+
+        if (funcionarioMaisVelho != null) {
+            int idade = calcularIdade(funcionarioMaisVelho.getDataNascimento(), dataAtual);
+            System.out.println("Nome: " + funcionarioMaisVelho.getNome());
+            System.out.println("Idade: " + idade);
+        }
+    }
+
+    private static int calcularIdade(LocalDate dataNascimento, LocalDate dataAtual) {
+        return dataAtual.getYear() - dataNascimento.getYear();
+    }
+    
+    
+    //3.10 Listar funcionário em ordem alfabética
+    private static void imprimirFuncionariosOrdemAlfabetica(List<Funcionario> funcionarios) {
+        funcionarios.stream()
+                .sorted(Comparator.comparing(Funcionario::getNome))
+                .forEach(funcionario -> {
+                    System.out.println("Nome: " + funcionario.getNome());
+                    System.out.println("Idade: " + calcularIdade(funcionario.getDataNascimento(), LocalDate.now()));
+                    System.out.println("Salário: " + funcionario.getSalario());
+                    System.out.println("Função: " + funcionario.getFuncao());
+                    System.out.println("------------------------");
+                });
+    }
+
 }
 
 
