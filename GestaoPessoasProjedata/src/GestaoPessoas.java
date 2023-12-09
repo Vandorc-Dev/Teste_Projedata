@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.stream.Collectors;
 
 public class GestaoPessoas {
 
@@ -11,11 +12,32 @@ public class GestaoPessoas {
 
         List<Funcionario> funcionarios = new ArrayList<>();
 
+        //Insere os funcionarios em uma lista
         inserirFuncionarios(funcionarios);
 
+        System.out.println("IPRIMIR LISTA DE FUNCIONÁRIOS COMPLETA:");
+        System.out.println("\n");
+        imprimirFuncionarios(funcionarios);
+        
+        //Remove um funcionario passado como argumento 
+        
         removerFuncionario(funcionarios, "João");
+        System.out.println("\nO funcionário João foi removido");
+        System.out.println("\n");
+        
+        System.out.println("IPRIMIR LISTA DE FUNCIONÁRIOS EXCLUÍNDO O FUNCIONÁRIO João");
+        System.out.println("\n");
+        imprimirFuncionarios(funcionarios);
 
         imprimirFuncionarios(funcionarios);
+        
+        aumentarSalario(funcionarios);
+        System.out.println("IPRIMIR LISTA DE FUNCIONÁRIOS COM AUMENTO DE 10%");
+        System.out.println("\n");
+        imprimirFuncionarios(funcionarios);
+        
+        
+        
     }
 
     private static void inserirFuncionarios(List<Funcionario> funcionarios) {
@@ -50,6 +72,7 @@ public class GestaoPessoas {
         funcionarios.removeIf(funcionario -> funcionario.getNome().equals(nome));
     }
 
+    //Imprimir lista de funcionarios 
     private static void imprimirFuncionarios(List<Funcionario> funcionarios) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
@@ -65,9 +88,28 @@ public class GestaoPessoas {
         }
     }
 
+    //Formatar o salário com separador de milhar como ponto, e decimal como vírgula
     private static String formatarSalario(BigDecimal salario) {
         DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
         decimalFormat.setDecimalFormatSymbols(new DecimalFormatSymbols());
         return decimalFormat.format(salario);
     }
+    
+    //3.4
+    private static void aumentarSalario(List<Funcionario> funcionarios) {
+        BigDecimal aumentoPercentual = new BigDecimal("1.10");
+        funcionarios.forEach(funcionario -> funcionario.setSalario(funcionario.getSalario().multiply(aumentoPercentual)));
+    }
+    
+    
+ // 3.5 - Agrupar os funcionários por função em um MAP, sendo a chave a “função” e o valor a “lista de funcionários”.
+    private static Map<String, List<Funcionario>> agruparFuncionariosPorFuncao(List<Funcionario> funcionarios) {
+        return funcionarios.stream()
+                .collect(Collectors.groupingBy(Funcionario::getFuncao));
+    }
+    
+    //3.6
 }
+
+
+
